@@ -19,10 +19,21 @@ def display_invalid_option (menu_selection):
 		print("\n{} is not a number, please enter a number from the menu above.".format(menu_selection))
 
 
-
 def is_valid_pizza(pizza_selection, pizzas):
 	return pizza_selection.isdigit() and int(pizza_selection) -1 < len(pizzas)
 
+
+def display_pizzas(pizzas):
+	if len(pizzas) > 0:
+		for index, pizza in enumerate(pizzas):
+			print("{}: {}  cost: ${}".format(index + 1, pizza["name"], pizza["cost"]))
+	else: 
+		print ("No Pizzas found.")		
+
+def display_total_cost(pizzas):
+	total_cost = sum([pizza["cost"] for in pizzas])
+	print("==========")
+	print("TOTAL COST: ${}".format(total_cost))
 
 
 def add_to_order():
@@ -31,8 +42,7 @@ def add_to_order():
 	"""
 	while True:
 		print("\n")
-		for index, pizza in enumerate(PIZZAS):
-			print("{}: {}".format(index + 1, pizza["name"]))
+		display_pizzas(PIZZAS)	
 		print("0. Go back.")
 
 		pizza_selection = input("\nWhich pizza would you like to order?")	
@@ -71,7 +81,9 @@ def main ():
 		elif menu_selection == "2":
 			pass
 		elif menu_selection == "3":
-			pass
+			display_pizzas(my_pizzas)
+			display_total_cost(my_pizzas)
+			print ("\n\n")
 		elif menu_selection == "4":
 			pass
 		else:
