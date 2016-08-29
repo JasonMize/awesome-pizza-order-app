@@ -31,15 +31,28 @@ def display_pizzas(pizzas):
 		print ("No Pizzas found.")		
 
 def display_total_cost(pizzas):
-	total_cost = sum([pizza["cost"] for in pizzas])
+	total_cost = sum([pizza["cost"] for pizza in pizzas])
 	print("==========")
 	print("TOTAL COST: ${}".format(total_cost))
 
+def display_order(pizzas):
+	display_pizzas(pizzas)
+	display_total_cost(pizzas)
+	print ("\n\n")
+
+def order_pizza():
+	if len(my_pizzas) > 0:
+		print("Thank you for your order!")
+		return True
+		my_pizzas = []
+	else: 
+		print("Please add pizzas to your order before completing the order.")
+		return False
+
+
 
 def add_to_order():
-	"""
-	Prompts for adding pizza to the order
-	"""
+	""" Prompts for adding pizza to the order """
 	while True:
 		print("\n")
 		display_pizzas(PIZZAS)	
@@ -57,7 +70,30 @@ def add_to_order():
 		print(my_pizzas)
 
 
+def remove_from_order():
+	""" Remove a pizza from my_pizzas based on user's input """
+	global my_pizzas
+
+	while True:
+		print("\n")
+		display_order(my_pizzas)	
+		print("0. Go back.")
+
+		pizza_selection = input("\nWhich pizza would you like to remove?")	
+
+		if pizza_selection == "0":
+			break
+		elif is_valid_pizza(pizza_selection, my_pizzas):
+			del my_pizzas[int(pizza_selection) - 1]
+		else:
+			display_invalid_option(pizza_selection)
+
+		print(my_pizzas)
+
+
 def main ():
+	global my_pizzas
+
 	MENU_ITEMS = (
 		"1. Add Pizza to Order",
 		"2. Remove Pizza from Order",
@@ -75,17 +111,20 @@ def main ():
 
 		if menu_selection == "0":
 			break
+
 		elif menu_selection == "1":
 			add_to_order()
-			pass
+
 		elif menu_selection == "2":
-			pass
+			remove_from_order()
+
 		elif menu_selection == "3":
-			display_pizzas(my_pizzas)
-			display_total_cost(my_pizzas)
-			print ("\n\n")
+			display_order(my_pizzas)
+
 		elif menu_selection == "4":
-			pass
+			display_order(my_pizzas)
+			if order_pizza():
+				my_pizzas = []	
 		else:
 			display_invalid_option(menu_selection)
 
