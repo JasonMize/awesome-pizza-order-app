@@ -21,6 +21,8 @@ class Topping ():
 		self.name = name
 		self.price = price
 
+	def __str__(self):
+		return "{} ${:,.2f}".format(self.name, self.price)
 
 class Pizza ():
 	MENU_ITEMS = (
@@ -31,14 +33,15 @@ class Pizza ():
 		"0: Cancel",
 	)
 
-	AVAILABLE TOPPINGS = (
+	AVAILABLE_TOPPINGS = (
 		Topping("Cheese"),
 		Topping("Pepperoni", 2.00),
 		Topping("Sausage", 2.50),
 	)
 
-	def __init__(self):
+	def __init__(self, base_price=5.00):
 		self.toppings = []
+		self.base_price = base_price
 
 	@classmethod	
 	def make_pizza(cls):
@@ -50,12 +53,52 @@ class Pizza ():
 			
 			if menu_selection == "0":
 				return None
+			elif menu_selection == "1":
+				pizza.add_toppings()
+			elif menu_selection == "2":
+				pizza.display_toppings()
 			elif menu_selection == "4":
 				return pizza	
 			else:
 				display_selection_error(menu_selection)
-
 		return None
+
+	def get_total_price (self):
+		return self.base_price + sum(topping.price for topping in self.toppings)
+
+	def get_toppings_menu_list (self, toppings):
+		menu_items = [
+			"{}: {}".format(index + 1, topping)
+			for index, topping in enumerate(toppings)
+		]
+		menu_items.append("0: Exit")
+		return menu_items
+
+	def is_valid_topping(self, selection):
+		return (selection.isdigit() and int(selection) - 1 < len(self.AVAILABLE_TOPPINGS))	
+
+	def add_toppings(self):
+		while True:
+			menu_selection = get_menu_selection(
+				self.get_toppings_menu_list(self.AVAILABLE_TOPPINGS))
+
+			if menu_selection == "0":
+				break
+			elif self.is_valid_topping(menu_selection):	
+				topping = self.AVAILABLE_TOPPINGS[int(menu_selection) - 1]
+				self.toppings.append(topping)
+				print("\n{} added to the pizza!".format(topping))
+			else:
+				display_selection_error(menu_selection)
+
+	def display_toppings(self):
+		if len(self.toppings) == 0:
+			print("No toppings.")
+		else:
+			for topping in self.toppings:
+				print (topping)	
+		print("=" * 10)
+		print("TOTAL PRICE: ${:,.2f}".format(self.get_total_price()))
 
 
 class Cart():
@@ -70,6 +113,9 @@ class Cart():
 	def __init__(self):
 		self.pizzas = []
 
+	def get_total_price(self):
+		return sum(pizza.get_total_price() for pizza in self.pizzas)
+
 	def add_pizza(self):
 		pizza = Pizza.make_pizza()
 		if pizza is not None:
@@ -77,8 +123,16 @@ class Cart():
 			print("\nPizza added to cart!")	
 
 	def display_pizza(self):
-		for pizza in self.pizzas:
-			print(pizza)		
+		if len(self.pizzas) == 0:
+			print ("There are no pizzas in the cart.")
+		else:
+			for index, pizza in enumerate(self.pizzas):
+				print("{index}: Pizza {index:<10} ${price:,.2f}"
+					.format(index=index +1, price = pizza.get_total_price()))	
+				pizza.display_toppings()
+			print("")	
+			print ("*" * 40)
+			print ("SHOPPING CART TOTAL: ${:,.2f}".format(self.get_total_price()))	
 
 	def display_menu(self):
 		while True:
