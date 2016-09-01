@@ -1,0 +1,7 @@
+- base_price: 5.0
+  toppings:
+  - {name: Pepperoni, price: 2.0}
+  - {name: Sausage, price: 2.5}
+  - {name: Cheese, price: 1.0}
+- base_price: 5.0
+  toppings: []

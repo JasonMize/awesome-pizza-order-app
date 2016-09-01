@@ -1,17 +1,25 @@
+import os
+import copy
+from datetime import datetime
+
+import yaml
+
 from menus import get_menu_selection, display_selection_error
-from pizzas import Pizza
+from pizzas import Pizza, PremadePizza
 
 class Cart():
 	MENU_ITEMS = (
-		"1: Add Pizza",
-		"2: Display Pizzas",
-		"3: Remove Pizza",
-		"4: Place order",
+		"1: Select Premade Pizza",
+		"2: Add Pizza",
+		"3: Display Pizzas",
+		"4: Remove Pizza",
+		"5: Place order",
 		"0: Exit", 
 	)
 
 	def __init__(self):
 		self.pizzas = []
+		self.available_pizzas = []
 
 	def get_total_price(self):
 		return sum(pizza.get_total_price() for pizza in self.pizzas)
@@ -27,8 +35,8 @@ class Cart():
 			print ("There are no pizzas in the cart.")
 		else:
 			for index, pizza in enumerate(self.pizzas):
-				print("{index}: Pizza {index:<10} ${price:,.2f}"
-					.format(index=index +1, price = pizza.get_total_price()))	
+				print("{index}: {pizza}"
+					.format(index=index +1, pizza=pizza))	
 				pizza.display_toppings()
 			print("")	
 			print ("*" * 40)
@@ -50,6 +58,59 @@ class Cart():
 			else:
 				display_selection_error(menu_selection)
 
+
+	def save_order(self):
+		if not os.path.exists('./orders'):
+			os.makedirs('./orders')	
+
+		order = []
+		for pizza in self.pizzas:
+			pizza_dict = pizza.__dict__
+			order.append(pizza_dict)
+			toppings = []
+
+			for topping in pizza.toppings:
+				toppings.append(topping.__dict__)
+
+			pizza_dict["toppings"] = toppings
+				
+		filepath = "./orders/{}.yml".format(datetime.now())
+			
+		with open(filepath, 'w') as order_file:
+			yaml.dump(order, order_file)
+
+		print (order)
+
+	def set_available_pizzas(self, pizzas_list):
+		for pizza_dict in pizzas_list:
+			pizza = PremadePizza.load_from_dict(pizza_dict)
+			self.available_pizzas.append(pizza)
+
+	def select_premade_pizza(self):
+		menu_items = [
+			"{}: {}".format(index+1, pizza)
+			for index, pizza in enumerate(self.available_pizzas)
+		]
+		menu_items.append("0: Cancel")
+
+		while True:
+			menu_selection = get_menu_selection(menu_items)
+
+			if menu_selection =="0":
+				break
+			elif (menu_selection.isdigit() 
+				and int(menu_selection) - 1 < len(self.available_pizzas)):
+
+				pizza = copy.deepcopy(self.available_pizzas[int(menu_selection) -1])
+				pizza = Pizza.make_pizza(pizza)
+				if pizza is not None:
+					self.pizzas.append(pizza)
+					print("\nPizza added to the cart!")
+				break	
+			else: 
+				display_selection_error(menu_selection)
+
+
 	def display_menu(self):
 		while True:
 			menu_selection = get_menu_selection(self.MENU_ITEMS)
@@ -57,13 +118,28 @@ class Cart():
 			if menu_selection == "0":
 				break
 			elif menu_selection == "1":
-				self.add_pizza()
+				if len(self.available_pizzas) > 0:
+					self.select_premade_pizza()
+				else:
+					print("\nThere are no premade pizzas to select")
 			elif menu_selection == "2":
-				self.display_pizza()
+				self.add_pizza()
 			elif menu_selection == "3":
-			 	self.remove_pizza()
+				self.display_pizza()
 			elif menu_selection == "4":
+			 	self.remove_pizza()
+			elif menu_selection == "5":
 				print ("\nYour pizzas are on their way.")
+				self.save_order()
 				self.pizzas = []
 			else:
 				display_selection_error(menu_selection)
+
+
+
+
+
+
+
+
+

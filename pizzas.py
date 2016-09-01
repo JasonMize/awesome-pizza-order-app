@@ -21,10 +21,11 @@ class Pizza ():
 		self.base_price = base_price
 
 	@classmethod	
-	def make_pizza(cls):
+	def make_pizza(cls, base_pizza=None):
 		# Return a new pizza based of what is entered by user
 		# cls == Pizza
-		pizza = cls()
+		pizza = base_pizza or cls()
+
 		while True:
 			menu_selection = get_menu_selection(pizza.MENU_ITEMS)
 			
@@ -91,3 +92,43 @@ class Pizza ():
 				print("\n{} removed from the pizza.".format(topping))
 			else:
 				display_selection_error(menu_selection)
+	def __str__(self):
+		return "Custom pizza - ({} toppings) ${:,.2f}".format(
+			len(self.toppings), self.get_total_price())
+
+
+class PremadePizza(Pizza):
+	def __init__(self, name="Premade", base_price=6.00, toppings=None):
+		super().__init__(base_price=base_price)
+		self.name = name
+		self.toppings = toppings or []
+
+	@classmethod
+	def load_from_dict(cls, pizza_dict):
+		# cls() == PremadePizza()
+		toppings = []
+		for topping_dict in pizza_dict["toppings"]:
+			topping = Topping(name=topping_dict["name"], 
+				price=topping_dict["price"])
+			toppings.append(topping)
+
+		pizza = cls(name=pizza_dict["name"], toppings = toppings)
+		return pizza
+
+	def __str__(self):
+		return "{} - ({} topping) ${:,.2f}".format(self.name, 
+			len(self.toppings), self.get_total_price())	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
